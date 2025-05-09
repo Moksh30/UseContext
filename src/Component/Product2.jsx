@@ -9,18 +9,22 @@ import InputLabel from "@mui/material/InputLabel";
 import OutlinedInput from "@mui/material/OutlinedInput";
 import InputAdornment from "@mui/material/InputAdornment";
 import { useRef } from "react";
+import CloseIcon from "@mui/icons-material/Close";
 
-function Product() {
+function Product2() {
   const [editDescription, setEditDescription] = useState("");
   const [edittitle, setEdittitle] = useState("");
   const [editprice, seteditprice] = useState("");
   const [avatar, setavatar] = useState();
+  const [Remove, setRemove] = useState(false);
 
   const [modal, setModal] = useState({
     open: false,
     data: null,
   });
   console.log("avatar", avatar);
+  console.log("avatar2", Boolean(avatar));
+  console.log("remove", Remove);
 
   const handleClose = () => {
     setModal({
@@ -31,13 +35,14 @@ function Product() {
 
   const fileUploadRef = useRef();
 
-  const handleImageUpload = (event) => {
-    event.preventDefault();
-    fileUploadRef.current.click();
-  };
+  //   const handleImageUpload = (event) => {
+  //     event.preventDefault();
+  //     fileUploadRef.current.click();
+  //   };
 
   const uploadImageDisplay = async () => {
     try {
+      fileUploadRef.current.click();
       const uploadedFile = fileUploadRef.current.files[0];
       const cachedURL = URL.createObjectURL(uploadedFile);
       setavatar(cachedURL);
@@ -202,33 +207,64 @@ function Product() {
               fullWidth
               defaultValue={modal.data.title}
             />
-            <img
-              src={avatar || modal.data.images?.[0]}
-              alt={modal.data.title}
-              style={{ width: "50%", objectFit: "contain" }}
-            />
-            <Button
-              type="submit"
-              onClick={(e) => {
-                handleImageUpload(e);
-              }}
-              sx={{
-                textTransform: "none",
-                color: "white",
-                backgroundColor: "green",
-                marginBottom: "20px",
-              }}
-            >
-              Edit
-            </Button>
-            <input
-              type="file"
-              id="file"
-              ref={fileUploadRef}
-              onChange={uploadImageDisplay}
-              accept="image/jpeg , image/svg, image/png"
-              hidden
-            />
+
+            {avatar && (
+              <>
+                <img
+                  src={avatar || modal.data.images?.[0]}
+                  alt={modal.data.title}
+                  style={{ width: "50%", objectFit: "contain" }}
+                />
+                <CloseIcon
+                  sx={{
+                    position: "absolute",
+                    top: "12%",
+                    right: "12%",
+                    textTransform: "none",
+                    color: "white",
+                    backgroundColor: "black",
+                    fontSize: "14px",
+                    height: "30px",
+                    width: "30px",
+                    cursor: "pointer",
+                    borderRadius: "50%",
+                  }}
+                  onClick={() => {
+                    setavatar(null);
+                    setRemove(true);
+                  }}
+                />
+              </>
+            )}
+            {Remove && !avatar && (
+              <>
+                {/* <Button
+                  type="submit"
+                  onClick={(e) => {
+                    handleImageUpload(e);
+                    setremovemain(true);
+                    // setRemove(false);
+                  }}
+                  sx={{
+                    textTransform: "none",
+                    color: "white",
+                    backgroundColor: "green",
+                    marginBottom: "20px",
+                    marginTop: "20px",
+                  }}
+                >
+                  Edit
+                </Button> */}
+                <input
+                  type="file"
+                  id="file"
+                  ref={fileUploadRef}
+                  onChange={uploadImageDisplay}
+                  accept="image/jpeg , image/svg, image/png"
+                  style={{ marginTop: "20px", marginBottom: "20px" }}
+                />
+              </>
+            )}
             <TextField
               onChange={(e) => {
                 console.log(e.target.value);
@@ -291,6 +327,7 @@ function Product() {
                 console.log("updatedProducts", updatedProducts);
                 setproduct({ ...product, products: updatedProducts });
                 handleClose();
+                setRemove(false);
               }}
             >
               {" "}
@@ -303,7 +340,7 @@ function Product() {
   );
 }
 
-export default Product;
+export default Product2;
 
 // Reference
 // https://blog.greenroots.info/series/react

@@ -1,11 +1,11 @@
 import Header from "./Header";
-import Product from "./Product";
+import Product2 from "./Product2";
 
 function Dashboard() {
   return (
     <div>
       <Header />
-      <Product />
+      <Product2 />
     </div>
   );
 }
