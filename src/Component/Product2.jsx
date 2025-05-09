@@ -15,9 +15,8 @@ function Product2() {
   const [editDescription, setEditDescription] = useState("");
   const [edittitle, setEdittitle] = useState("");
   const [editprice, seteditprice] = useState("");
-  const [avatar, setavatar] = useState();
+  const [avatar, setAvatar] = useState([]);
   const [Remove, setRemove] = useState(false);
-
   const [modal, setModal] = useState({
     open: false,
     data: null,
@@ -32,7 +31,7 @@ function Product2() {
       data: null,
     });
   };
-
+  console.log("Modal", modal);
   const fileUploadRef = useRef();
 
   //   const handleImageUpload = (event) => {
@@ -42,15 +41,23 @@ function Product2() {
 
   const uploadImageDisplay = async () => {
     try {
-      fileUploadRef.current.click();
-      const uploadedFile = fileUploadRef.current.files[0];
-      const cachedURL = URL.createObjectURL(uploadedFile);
-      setavatar(cachedURL);
+      // fileUploadRef.current.click();
+      // const uploadedFile = fileUploadRef.current.files[0];
+      // const cachedURL = URL.createObjectURL(uploadedFile);
+      const uploadedFiles = Array.from(fileUploadRef.current.files);
+      const cachedURLs = uploadedFiles.map((file) => URL.createObjectURL(file));
+      setAvatar(cachedURLs);
     } catch (error) {
       console.error(error);
-      setavatar(null);
+      setAvatar(null);
     }
   };
+  // const uploadImageDisplay = (e) => {
+  //   console.log("Target", e.target.files);
+  //   const data2 = setediting(e.target.files);
+  //   const imageUrls = data2.map((data22) => URL.createObjectURL(data22));
+  //   setAvatar(imageUrls);
+  // };
   const handleOpen = (product) => {
     setModal({
       open: true,
@@ -59,9 +66,15 @@ function Product2() {
     seteditprice(product.price);
     setEdittitle(product.title);
     setEditDescription(product.description);
-    setavatar(product.images[0]);
+    setAvatar(product.images);
   };
+  const handleclick = (index) => {
+    console.log("index", index);
 
+    const fill = avatar.filter((item, iIndex) => iIndex !== index);
+    console.log("fill", fill);
+    setAvatar(fill);
+  };
   const { product, setproduct } = useContext(Login2);
   console.log("product", product);
   useEffect(() => {
@@ -87,6 +100,8 @@ function Product2() {
     };
     fetchData();
   }, []);
+
+  console.log("avtar", avatar, Boolean(avatar));
 
   return (
     <Box
@@ -191,7 +206,6 @@ function Product2() {
         <BasicModal isOpen={modal.open} onClose={handleClose}>
           <div
             style={{
-              position: "relative",
               display: "flex",
               justifyContent: "center",
               alignItems: "center",
@@ -209,34 +223,50 @@ function Product2() {
             />
 
             {avatar && (
-              <>
-                <img
-                  src={avatar || modal.data.images?.[0]}
-                  alt={modal.data.title}
-                  style={{ width: "50%", objectFit: "contain" }}
-                />
-                <CloseIcon
-                  sx={{
-                    position: "absolute",
-                    top: "12%",
-                    right: "12%",
-                    textTransform: "none",
-                    color: "white",
-                    backgroundColor: "black",
-                    fontSize: "14px",
-                    height: "30px",
-                    width: "30px",
-                    cursor: "pointer",
-                    borderRadius: "50%",
-                  }}
-                  onClick={() => {
-                    setavatar(null);
-                    setRemove(true);
-                  }}
-                />
-              </>
+              <div>
+                {avatar.map((avatar2, index) => (
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      flexDirection: "column",
+                    }}
+                  >
+                    <img
+                      src={avatar2 || modal.data.images}
+                      alt={modal.data.title}
+                      style={{
+                        width: "60%",
+                        objectFit: "contain",
+                        position: "relative",
+                      }}
+                      key={index}
+                    />
+                    <CloseIcon
+                      sx={{
+                        position: "absolute",
+                        right: "12%",
+                        textTransform: "none",
+                        color: "white",
+                        backgroundColor: "black",
+                        fontSize: "14px",
+                        height: "30px",
+                        width: "30px",
+                        cursor: "pointer",
+                        borderRadius: "50%",
+                      }}
+                      onClick={() => {
+                        // setAvatar(null);
+                        handleclick(index);
+                        setRemove(true);
+                      }}
+                    />
+                  </div>
+                ))}
+              </div>
             )}
-            {Remove && !avatar && (
+            {Remove && avatar.length == 0 && (
               <>
                 {/* <Button
                   type="submit"
@@ -258,8 +288,11 @@ function Product2() {
                 <input
                   type="file"
                   id="file"
+                  multiple
                   ref={fileUploadRef}
-                  onChange={uploadImageDisplay}
+                  onChange={(e) => {
+                    uploadImageDisplay(e);
+                  }}
                   accept="image/jpeg , image/svg, image/png"
                   style={{ marginTop: "20px", marginBottom: "20px" }}
                 />
@@ -344,3 +377,4 @@ export default Product2;
 
 // Reference
 // https://blog.greenroots.info/series/react
+// issuse is whe remove the remove image using the cross icon then upload that time not show button for every item & 2nd is showing issus
