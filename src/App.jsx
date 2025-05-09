@@ -1,5 +1,4 @@
 import "./App.css";
-import Login from "../src/Component/Login.jsx";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Dashboard from "./Component/Dashboard.jsx";
 import MainProfile from "./Component/Mainprofile.jsx";

@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/rules-of-hooks */
 import { useEffect, useContext, useState } from "react";
 import { Box, Button, Grid } from "@mui/material";
 import { Login2 } from "../Context/Login2.jsx";
@@ -9,16 +8,19 @@ import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
 import OutlinedInput from "@mui/material/OutlinedInput";
 import InputAdornment from "@mui/material/InputAdornment";
-import { jwtDecode } from "jwt-decode";
+import { useRef } from "react";
 
 function Product() {
   const [editDescription, setEditDescription] = useState("");
   const [edittitle, setEdittitle] = useState("");
   const [editprice, seteditprice] = useState("");
+  const [avatar, setavatar] = useState();
+
   const [modal, setModal] = useState({
     open: false,
     data: null,
   });
+  console.log("avatar", avatar);
 
   const handleClose = () => {
     setModal({
@@ -27,12 +29,24 @@ function Product() {
     });
   };
 
-  // console.log("moda", modal);
-  console.log("Descriptionmain", editDescription);
-  // console.log("edittitle", edittitle);
+  const fileUploadRef = useRef();
 
+  const handleImageUpload = (event) => {
+    event.preventDefault();
+    fileUploadRef.current.click();
+  };
+
+  const uploadImageDisplay = async () => {
+    try {
+      const uploadedFile = fileUploadRef.current.files[0];
+      const cachedURL = URL.createObjectURL(uploadedFile);
+      setavatar(cachedURL);
+    } catch (error) {
+      console.error(error);
+      setavatar(null);
+    }
+  };
   const handleOpen = (product) => {
-    // console.log("Product Dataa", product);
     setModal({
       open: true,
       data: product,
@@ -40,6 +54,7 @@ function Product() {
     seteditprice(product.price);
     setEdittitle(product.title);
     setEditDescription(product.description);
+    setavatar(product.images[0]);
   };
 
   const { product, setproduct } = useContext(Login2);
@@ -55,10 +70,10 @@ function Product() {
             "Content-Type": "application/json",
           },
         });
-        // console.log({ res });
+
         if (res.ok) {
           const data = await res.json();
-          // console.log({ data });
+
           setproduct(data);
         }
       } catch (err) {
@@ -67,8 +82,6 @@ function Product() {
     };
     fetchData();
   }, []);
-
-  // console.log("from modal state", modal.open);
 
   return (
     <Box
@@ -190,11 +203,32 @@ function Product() {
               defaultValue={modal.data.title}
             />
             <img
-              src={modal.data.images?.[0]}
+              src={avatar || modal.data.images?.[0]}
               alt={modal.data.title}
               style={{ width: "50%", objectFit: "contain" }}
             />
-
+            <Button
+              type="submit"
+              onClick={(e) => {
+                handleImageUpload(e);
+              }}
+              sx={{
+                textTransform: "none",
+                color: "white",
+                backgroundColor: "green",
+                marginBottom: "20px",
+              }}
+            >
+              Edit
+            </Button>
+            <input
+              type="file"
+              id="file"
+              ref={fileUploadRef}
+              onChange={uploadImageDisplay}
+              accept="image/jpeg , image/svg, image/png"
+              hidden
+            />
             <TextField
               onChange={(e) => {
                 console.log(e.target.value);
@@ -204,7 +238,7 @@ function Product() {
               label="Product-Description"
               multiline
               fullWidth
-              rows={3}
+              rows={4}
               defaultValue={modal.data.description}
             />
             <FormControl fullWidth sx={{ m: 2 }}>
@@ -235,7 +269,12 @@ function Product() {
             />
             <Button
               type="button"
-              sx={{ bgcolor: "red", color: "black" }}
+              sx={{
+                bgcolor: "red",
+                color: "white",
+                textTransform: "none",
+                marginTop: "20px",
+              }}
               onClick={() => {
                 const updatedProducts = product.products.map((p) =>
                   p.id === modal.data.id
@@ -244,12 +283,13 @@ function Product() {
                         title: edittitle,
                         description: editDescription,
                         price: editprice,
+                        images: [avatar],
                       }
                     : p
                 );
+
                 console.log("updatedProducts", updatedProducts);
                 setproduct({ ...product, products: updatedProducts });
-
                 handleClose();
               }}
             >
